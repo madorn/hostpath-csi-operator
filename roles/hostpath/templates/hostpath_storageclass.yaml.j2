@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ storage_class.name|lower}}
+  annotations:
+    storageclass.kubernetes.io/is-default-class: {{ storage_class.default|lower}}
+provisioner: hostpath.csi.k8s.io
+volumeBindingMode: Immediate
+reclaimPolicy: {{ storage_class.reclaim_policy|capitalize}}
+allowVolumeExpansion: {{ storage_class.allow_volume_expansion|lower}}
+parameters:
+  csi.storage.k8s.io/fstype: {{storage_class.parameters.fstype|lower}}

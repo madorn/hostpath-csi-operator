@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: hostpath-csi-node-driver
+  namespace: hostpath-csi
+spec:
+  selector:
+    matchLabels:
+      app: hostpath-csi
+  template:
+    metadata:
+      labels:
+        app: hostpath-csi
+    spec:
+     # Hostpath CSI driver can only run on one node so we use this affinity rule locks to one node
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - hostpath-csi
+            topologyKey: kubernetes.io/hostname
+      replicas: 1
+      containers:
+     # Node Driver Registrar container
+      - name: node-driver-registrar
+        image: {{ image.driver.repo }}/csi-node-driver-registrar:v1.2.0
+        imagePullPolicy: {{ image.driver.pull_policy }}
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "rm -rf /registration/csi-hostpath /registration/csi-hostpath-reg.sock"]
+        args:
+          - --v={{ log_level }}
+          - --csi-address=/csi/csi.sock
+          - --kubelet-registration-path=/var/lib/kubelet/plugins/csi-hostpath/csi.sock
+        env:
+          - name: KUBE_NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: socket-dir
+          mountPath: /csi
+        - name: registration-dir
+          mountPath: /registration
+        - name: csi-data-dir
+          mountPath: /csi-data-dir
+
+      # Hostpath CSI plugin container
+      - name: hostpath-csi-driver
+        image: {{ image.driver.repo }}/hostpathplugin:v1.3.0
+        imagePullPolicy: {{ image.driver.pull_policy}}
+        args:
+        - --drivername=hostpath.csi.k8s.io
+        - --v={{ log_level }}
+        - --endpoint=$(CSI_ENDPOINT)
+        - --nodeid=$(KUBE_NODE_NAME)
+        env:
+        - name: CSI_ENDPOINT
+          value: unix:///csi/csi.sock
+        - name: KUBE_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        ports:
+        - containerPort: 9898
+          name: healthz
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: healthz
+          initialDelaySeconds: 10
+          timeoutSeconds: 3
+          periodSeconds: 2
+        volumeMounts:
+          - name: socket-dir
+            mountPath: /csi
+          - name: mountpoint-dir
+            mountPath: /var/lib/kubelet/pods
+            mountPropagation: Bidirectional
+          - name: plugins-dir
+            mountPath: /var/lib/kubelet/plugins
+            mountPropagation: Bidirectional
+          - name: csi-data-dir
+            mountPath: /csi-data-dir
+          - name: dev-dir
+            mountPath: /dev
+        securityContext:
+          privileged: true
+
+      # CSI livenessprobe
+      - name: liveness-probe
+        image: {{ image.sidecar.repo }}/livenessprobe:v2.0.0
+        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        args:
+        - --csi-address=/csi/csi.sock
+        - --health-port=9898
+        volumeMounts:
+          - name: socket-dir
+            mountPath: /csi
+
+      serviceAccount: hostpath-csi-node
+      volumes:
+        # This volume is where the socket for kubelet->driver communication is done
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi-hostpath
+            type: DirectoryOrCreate
+        # This volume is where the driver mounts volumes
+        - name: mountpoint-dir
+          hostPath:
+            path: /var/lib/kubelet/pods
+            type: DirectoryOrCreate
+        # This volume is where the node-driver-registrar registers the plugin with kubelet
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry
+            type: Directory
+        # This volume gives the driver access to the general plugins directory 
+        - name: plugins-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins
+            type: Directory
+        # This volume is where PV data is persisted on host. Change path to tmp if you do not want PVs to persist after container recreation.
+        - name: csi-data-dir
+          hostPath:
+            path: /var/lib/csi-hostpath-data/
+            type: DirectoryOrCreate
+        # This volume provides plugin with access to /dev
+        - name: dev-dir
+          hostPath:
+            path: /dev
+            type: Directory

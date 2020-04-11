@@ -1,0 +1,30 @@
+apiVersion: storage.yourcompany.com/v1alpha1
+kind: HostPath
+metadata:
+  name: example-hostpath
+spec:
+  logLevel: 5
+  image:
+    driver:
+      repo: quay.io/k8scsi
+      pullPolicy: Always
+    sidecar:
+      repo: quay.io/k8scsi
+      pullPolicy: Always
+  controllerPlugin:
+    replicas: 1
+  storageClass:
+    create: true
+    default: false
+    name: csi-hostpath-sc
+    reclaimPolicy: Delete
+    allowVolumeExpansion: True
+    parameters:
+      fstype: ext4
+
+# Other ideas for your plugin...
+# mgmt_server_config:
+#   protocol: https
+#    server: your.server.com:4000
+#    username: admin
+#    password: <secret>

@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hostpath-csi-controller
+  namespace: hostpath-csi
+spec:
+  serviceName: "hostpath-csi-controller"
+  selector:
+    matchLabels:
+      app: hostpath-csi
+  replicas: {{ controller_plugin.replicas }}
+  template:
+    metadata:
+      labels:
+        app: hostpath-csi
+    spec:
+      containers:
+#      # Hostpath CSI plugin container
+#      - name: hostpath-csi-driver
+#        image: {{ image.driver.repo }}/hostpathplugin:v1.3.0
+#        imagePullPolicy: {{ image.driver.pull_policy }}
+#        args:
+#        - --drivername=hostpath.csi.k8s.io
+#        - --v={{ log_level }}
+#        - --endpoint=$(CSI_ENDPOINT)
+#        - --nodeid=$(KUBE_NODE_NAME)
+#        env:
+#        - name: CSI_ENDPOINT
+#          value: unix:///csi/csi.sock
+#        - name: KUBE_NODE_NAME
+#          valueFrom:
+#            fieldRef:
+#              apiVersion: v1
+#              fieldPath: spec.nodeName
+#        ports:
+#        - containerPort: 9898
+#          name: healthz
+#          protocol: TCP
+#        livenessProbe:
+#          failureThreshold: 5
+#          httpGet:
+#            path: /healthz
+#            port: healthz
+#          initialDelaySeconds: 10
+#          timeoutSeconds: 3
+#          periodSeconds: 2
+#        volumeMounts:
+#          - name: socket-dir
+#            mountPath: /csi
+#          - name: csi-data-dir
+#            mountPath: /csi-data-dir
+#        securityContext:
+#          privileged: true
+#
+#        # csi livenessprobe
+#      - name: liveness-probe
+#        image: {{ image.sidecar.repo }}/livenessprobe:v2.0.0
+#        imagePullPolicy: {{ image.sidecar.pull_policy }}
+#        args:
+#        - --csi-address=/csi/csi.sock
+#        - --health-port=9898
+#        volumeMounts:
+#          - name: socket-dir
+#            mountPath: /csi
+
+      # provisioner
+      - name: csi-provisioner
+        image: {{ image.sidecar.repo }}/csi-provisioner:v1.5.0
+        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        args:
+          - "--csi-address=/csi/csi.sock"
+          - "--v={{ log_level }}"
+          - "--feature-gates=Topology=true"
+        volumeMounts:
+          - name: socket-dir
+            mountPath: /csi
+
+      # attacher
+      - name: csi-attacher
+        image: {{ image.sidecar.repo }}/csi-attacher:v2.1.0
+        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        args:
+          - "--v={{ log_level }}"
+          - "--csi-address=/csi/csi.sock"
+        volumeMounts:
+          - name: socket-dir
+            mountPath: /csi
+
+      # resizer
+      - name: csi-resizer
+        image: {{ image.sidecar.repo }}/csi-resizer:v0.4.0
+        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        args:
+          - "--v={{ log_level }}"
+          - "--csi-address=/csi/csi.sock"
+          - "--leader-election"
+        volumeMounts:
+          - name: socket-dir
+            mountPath: /csi 
+
+      serviceAccount: hostpath-csi-controller
+      volumes:
+        # This volume is where the socket for CSI sidecar->driver communication is done
+        - name: socket-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins/csi-hostpath
+            type: DirectoryOrCreate
+        - name: csi-data-dir
+          hostPath:
+            path: /var/lib/csi-hostpath-data/
+            type: DirectoryOrCreate

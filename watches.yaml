@@ -1,0 +1,9 @@
+---
+- version: v1alpha1
+  group: storage.yourcompany.com
+  kind: HostPath
+  playbook: playbook.yml
+  finalizer:
+    name: finalizer.storage.yourcompany.com
+    vars:
+      state: absent
