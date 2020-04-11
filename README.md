@@ -15,7 +15,7 @@ Requirements
 
 A Kubernetes 1.17 cluster.
 
-**TODO**: conditionals based off Kubenetes versions to ensure proper CSI sidecars are deployed.
+**TODO**: conditionals based off k8s versions to ensure proper CSI sidecar versions are deployed.
 
 Example Playbook
 ----------------
