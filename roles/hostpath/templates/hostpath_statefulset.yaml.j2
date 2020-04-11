@@ -15,7 +15,8 @@ spec:
         app: hostpath-csi
     spec:
       containers:
-#      # Hostpath CSI plugin container
+#      # Hostpath CSI plugin container - Only one driver required for hostpath plugin - we can rely on DaemonSet's Hostpath container to handlel control functions.
+#      # This will typically by uncommented and running your driver to handle all Control functions (i.e. Create/Delete Volume, ControllerPublishVolume, etc)
 #      - name: hostpath-csi-driver
 #        image: {{ image.driver.repo }}/hostpathplugin:v1.3.0
 #        imagePullPolicy: {{ image.driver.pull_policy }}
@@ -52,7 +53,7 @@ spec:
 #        securityContext:
 #          privileged: true
 #
-#        # csi livenessprobe
+#      # CSI Livenessprobe - this container probes the socket-dir to ensure HostPath driver is alive
 #      - name: liveness-probe
 #        image: {{ image.sidecar.repo }}/livenessprobe:v2.0.0
 #        imagePullPolicy: {{ image.sidecar.pull_policy }}
@@ -63,7 +64,7 @@ spec:
 #          - name: socket-dir
 #            mountPath: /csi
 
-      # provisioner
+      # provisioner - interacts with kube API for PV/PVC objects, sends calls to socket-dir
       - name: csi-provisioner
         image: {{ image.sidecar.repo }}/csi-provisioner:v1.5.0
         imagePullPolicy: {{ image.sidecar.pull_policy }}
@@ -75,7 +76,7 @@ spec:
           - name: socket-dir
             mountPath: /csi
 
-      # attacher
+      # attacher - interacts with kube API for VolumeAttachment objects, sends calls to socket-dir
       - name: csi-attacher
         image: {{ image.sidecar.repo }}/csi-attacher:v2.1.0
         imagePullPolicy: {{ image.sidecar.pull_policy }}
@@ -86,7 +87,7 @@ spec:
           - name: socket-dir
             mountPath: /csi
 
-      # resizer
+      # resizer - interacts with kube API for resize mods to PV/PVC objects, sends calls to socket-dir
       - name: csi-resizer
         image: {{ image.sidecar.repo }}/csi-resizer:v0.4.0
         imagePullPolicy: {{ image.sidecar.pull_policy }}
@@ -101,11 +102,8 @@ spec:
       serviceAccount: hostpath-csi-controller
       volumes:
         # This volume is where the socket for CSI sidecar->driver communication is done
+        # Typically only needs to be an EmptyDir but in this case, HostPath's DaemonSet driver container will also need to listen for calls
         - name: socket-dir
           hostPath:
             path: /var/lib/kubelet/plugins/csi-hostpath
-            type: DirectoryOrCreate
-        - name: csi-data-dir
-          hostPath:
-            path: /var/lib/csi-hostpath-data/
             type: DirectoryOrCreate
