@@ -1,0 +1,81 @@
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hostpath-csi-operator
+subjects:
+- kind: ServiceAccount
+  name: hostpath-csi-operator
+roleRef:
+  kind: Role
+  name: hostpath-csi-operator
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hostpath-csi-driver-binding
+subjects:
+  - kind: ServiceAccount
+    name: hostpath-csi-controller
+    namespace: hostpath-csi
+  - kind: ServiceAccount
+    name: hostpath-csi-node
+    namespace: hostpath-csi
+roleRef:
+  kind: ClusterRole
+  name: hostpath-csi-driver-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hospath-csi-provisioner-binding
+subjects:
+  - kind: ServiceAccount
+    name: hostpath-csi-controller
+    namespace: hostpath-csi
+roleRef:
+  kind: ClusterRole
+  name: hostpath-csi-provisioner-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hostpath-csi-attacher-binding
+subjects:
+  - kind: ServiceAccount
+    name: hostpath-csi-controller
+    namespace: hostpath-csi
+roleRef:
+  kind: ClusterRole
+  name: hostpath-csi-attacher-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-resizer-role
+subjects:
+  - kind: ServiceAccount
+    name: hostpath-csi-controller
+    namespace: hostpath-csi
+roleRef:
+  kind: ClusterRole
+  name: external-resizer-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: csi-resizer-role-cfg
+  namespace: hostpath-csi
+subjects:
+  - kind: ServiceAccount
+    name: hostpath-csi-controller
+    namespace: hostpath-csi
+roleRef:
+  kind: Role
+  name: external-resizer-cfg
+  apiGroup: rbac.authorization.k8s.io
