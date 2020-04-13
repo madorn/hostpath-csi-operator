@@ -18,10 +18,12 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: hostpath-csi-controller
-    namespace: hostpath-csi
+    # replace with non-default namespace name
+    namespace: default
   - kind: ServiceAccount
     name: hostpath-csi-node
-    namespace: hostpath-csi
+    # replace with non-default namespace name
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: hostpath-csi-driver-role
@@ -34,7 +36,8 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: hostpath-csi-controller
-    namespace: hostpath-csi
+    # replace with non-default namespace name
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: hostpath-csi-provisioner-role
@@ -47,7 +50,8 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: hostpath-csi-controller
-    namespace: hostpath-csi
+    # replace with non-default namespace name
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: hostpath-csi-attacher-role
@@ -60,7 +64,8 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: hostpath-csi-controller
-    namespace: hostpath-csi
+    # replace with non-default namespace name
+    namespace: default
 roleRef:
   kind: ClusterRole
   name: external-resizer-role
@@ -70,11 +75,9 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: csi-resizer-role-cfg
-  namespace: hostpath-csi
 subjects:
   - kind: ServiceAccount
     name: hostpath-csi-controller
-    namespace: hostpath-csi
 roleRef:
   kind: Role
   name: external-resizer-cfg
