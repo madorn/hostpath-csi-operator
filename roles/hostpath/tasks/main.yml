@@ -9,11 +9,6 @@
     definition: "{{ lookup('template', 'hostpath_storageclass.yaml.j2')|from_yaml }}"
     state: "{{ state }}"
 
-- name: Create Namespace for HostPath
-  k8s:
-    definition: "{{ lookup('template', 'hostpath_namespace.yaml.j2')|from_yaml }}"
-    state: "{{ state }}"
-
 - name: Create CSIDriver for HostPath
   k8s:
     definition: "{{ lookup('template', 'hostpath_csidriver.yaml.j2')|from_yaml }}"

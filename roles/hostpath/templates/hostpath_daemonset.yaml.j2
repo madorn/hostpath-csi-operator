@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: hostpath-csi-node-driver
-  namespace: hostpath-csi
+  namespace: '{{ meta.namespace }}'
 spec:
   selector:
     matchLabels:
