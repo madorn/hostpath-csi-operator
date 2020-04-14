@@ -1,0 +1,5 @@
+channels:
+- currentCSV: hostpath-csi-operator.v0.0.1
+  name: alpha
+defaultChannel: alpha
+packageName: hosotpath-csi-operator
