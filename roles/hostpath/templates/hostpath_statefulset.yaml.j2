@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: hostpath-csi
-  replicas: {{ controller_plugin.replicas }}
+  replicas: {{ replicas }}
   template:
     metadata:
       labels:
@@ -18,8 +18,8 @@ spec:
 #      # Hostpath CSI plugin container - Only one driver required for hostpath plugin - we can rely on DaemonSet's Hostpath container to handlel control functions.
 #      # This will typically by uncommented and running your driver to handle all Control functions (i.e. Create/Delete Volume, ControllerPublishVolume, etc)
 #      - name: hostpath-csi-driver
-#        image: {{ image.driver.repo }}/hostpathplugin:v1.3.0
-#        imagePullPolicy: {{ image.driver.pull_policy }}
+#        image: {{ driver.repo }}/hostpathplugin:v1.3.0
+#        imagePullPolicy: {{ driver.image_pull_policy }}
 #        args:
 #        - --drivername=hostpath.csi.k8s.io
 #        - --v={{ log_level }}
@@ -55,8 +55,8 @@ spec:
 #
 #      # CSI Livenessprobe - this container probes the socket-dir to ensure HostPath driver is alive
 #      - name: liveness-probe
-#        image: {{ image.sidecar.repo }}/livenessprobe:v2.0.0
-#        imagePullPolicy: {{ image.sidecar.pull_policy }}
+#        image: {{ sidecar.repo }}/livenessprobe:v2.0.0
+#        imagePullPolicy: {{ sidecar.image_pull_policy }}
 #        args:
 #        - --csi-address=/csi/csi.sock
 #        - --health-port=9898
@@ -66,8 +66,8 @@ spec:
 
       # provisioner - interacts with kube API for PV/PVC objects, sends calls to socket-dir
       - name: csi-provisioner
-        image: {{ image.sidecar.repo }}/csi-provisioner:v1.5.0
-        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        image: {{ sidecar.repo }}/csi-provisioner:v1.5.0
+        imagePullPolicy: {{ sidecar.image_pull_policy }}
         args:
           - "--csi-address=/csi/csi.sock"
           - "--v={{ log_level }}"
@@ -78,8 +78,8 @@ spec:
 
       # attacher - interacts with kube API for VolumeAttachment objects, sends calls to socket-dir
       - name: csi-attacher
-        image: {{ image.sidecar.repo }}/csi-attacher:v2.1.0
-        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        image: {{ sidecar.repo }}/csi-attacher:v2.1.0
+        imagePullPolicy: {{ sidecar.image_pull_policy }}
         args:
           - "--v={{ log_level }}"
           - "--csi-address=/csi/csi.sock"
@@ -89,8 +89,8 @@ spec:
 
       # resizer - interacts with kube API for resize mods to PV/PVC objects, sends calls to socket-dir
       - name: csi-resizer
-        image: {{ image.sidecar.repo }}/csi-resizer:v0.4.0
-        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        image: {{ sidecar.repo }}/csi-resizer:v0.4.0
+        imagePullPolicy: {{ sidecar.image_pull_policy }}
         args:
           - "--v={{ log_level }}"
           - "--csi-address=/csi/csi.sock"

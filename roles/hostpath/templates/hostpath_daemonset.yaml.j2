@@ -28,8 +28,8 @@ spec:
       containers:
      # Node Registrar container - this container registers the CSI driver with kubelet
       - name: node-driver-registrar
-        image: {{ image.driver.repo }}/csi-node-driver-registrar:v1.2.0
-        imagePullPolicy: {{ image.driver.pull_policy }}
+        image: {{ sidecar.repo }}/csi-node-driver-registrar:v1.2.0
+        imagePullPolicy: {{ sidecar.image_pull_policy }}
         lifecycle:
           preStop:
             exec:
@@ -56,8 +56,8 @@ spec:
 
       # Hostpath CSI plugin container - this container serves both controller and node plugin functions (i.e. creates volumes AND mounts to pods)
       - name: hostpath-csi-driver
-        image: {{ image.driver.repo }}/hostpathplugin:v1.3.0
-        imagePullPolicy: {{ image.driver.pull_policy}}
+        image: {{ driver.repo }}/hostpathplugin:v1.3.0
+        imagePullPolicy: {{ driver.image_pull_policy }}
         args:
         - --drivername=hostpath.csi.k8s.io
         - --v={{ log_level }}
@@ -102,8 +102,8 @@ spec:
 
       # CSI Livenessprobe - this container probes the socket-dir to ensure Hostpath driver is alive
       - name: liveness-probe
-        image: {{ image.sidecar.repo }}/livenessprobe:v2.0.0
-        imagePullPolicy: {{ image.sidecar.pull_policy }}
+        image: {{ sidecar.repo }}/livenessprobe:v2.0.0
+        imagePullPolicy: {{ sidecar.image_pull_policy }}
         args:
         - --csi-address=/csi/csi.sock
         - --health-port=9898

@@ -9,4 +9,4 @@ volumeBindingMode: Immediate
 reclaimPolicy: {{ storage_class.reclaim_policy|capitalize}}
 allowVolumeExpansion: {{ storage_class.allow_volume_expansion|lower}}
 parameters:
-  csi.storage.k8s.io/fstype: {{storage_class.parameters.fstype|lower}}
+  csi.storage.k8s.io/fstype: {{storage_class.fstype|lower}}
