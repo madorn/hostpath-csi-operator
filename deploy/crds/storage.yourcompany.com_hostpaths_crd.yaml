@@ -2,9 +2,9 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: hostpaths.storage.yourcompany.com
+  name: hostpaths.yourcompany.storage.com
 spec:
-  group: storage.yourcompany.com
+  group: yourcompany.storage.com
   names:
     kind: HostPath
     listKind: HostPathList
@@ -15,9 +15,70 @@ spec:
     status: {}
   validation:
     openAPIV3Schema:
+      description: HostPath is the Schema for the hostpaths API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: HostPathSpec defines the desired state of HostPath
+          properties:
+            replicas:
+              format: int32
+              type: integer
+              minimum: 1
+              maximum: 10
+            logLevel:
+              format: int32
+              type: integer
+              minimum: 0
+              maximum: 9
+            driver:
+              properties:
+                imagePullPolicy:
+                  type: string
+                repo:
+                  type: string
+              type: object
+            sidecar:
+              properties:
+                imagePullPolicy:
+                  type: string
+                repo:
+                  type: string
+              type: object
+            storageClass:
+              properties:
+                create:
+                  type: boolean
+                default:
+                  type: boolean
+                name:
+                  type: string
+                reclaimPolicy:
+                  type: string
+                allowVolumeExpansion:
+                  type: boolean
+                fstype:
+                  type: string
+              type: object
+          type: object
+        status:
+          description: HostPathStatus defines the observed state of HostPath
+          type: object
       type: object
-      x-kubernetes-preserve-unknown-fields: true
+  version: v1alpha1
   versions:
   - name: v1alpha1
     served: true
     storage: true
+
