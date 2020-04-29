@@ -3,10 +3,10 @@ kind: StorageClass
 metadata:
   name: {{ storage_class.name|lower}}
   annotations:
-    storageclass.kubernetes.io/is-default-class: {{ storage_class.default|lower}}
+    storageclass.kubernetes.io/is-default-class: "{{ storage_class.default|lower}}"
 provisioner: hostpath.csi.k8s.io
 volumeBindingMode: Immediate
-reclaimPolicy: {{ storage_class.reclaim_policy|capitalize}}
-allowVolumeExpansion: {{ storage_class.allow_volume_expansion|lower}}
+reclaimPolicy: {{ storage_class.reclaim_policy|capitalize }}
+allowVolumeExpansion: {{ storage_class.allow_volume_expansion|capitalize}}
 parameters:
   csi.storage.k8s.io/fstype: {{storage_class.fstype|lower}}

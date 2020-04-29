@@ -1,7 +1,7 @@
 ---
 - name: Output k8s version
   debug:
-    msg: "{{ k8s_server_version.kubernetes.gitVersion }}"
+    msg: "{{ k8s_version }}"
 
 - name: Create StorageClass for HostPath
   when: storage_class.create|bool

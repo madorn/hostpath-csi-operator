@@ -66,6 +66,7 @@ spec:
                   type: string
                 reclaimPolicy:
                   type: string
+                  enum: ["Delete", "Reclaim"]
                 allowVolumeExpansion:
                   type: boolean
                 fstype:

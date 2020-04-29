@@ -1,2 +1,3 @@
 ---
-k8s_server_version: "{{ lookup('k8s', cluster_info='version') }}"
+version: "{{ lookup('k8s', cluster_info='version') }}"
+k8s_version: "{{ version.kubernetes.gitVersion | regex_search('[^v;]+') }}"
