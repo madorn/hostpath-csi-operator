@@ -90,7 +90,17 @@ spec:
 
       # attacher - interacts with kube API for VolumeAttachment objects, sends calls to socket-dir
       - name: csi-attacher
+{% elif k8s_version >= '1.17.0' %}
+        image: {{ sidecar.repo }}/csi-attacher:v2.2.0
+{% elif k8s_version >= '1.16.0' %}
         image: {{ sidecar.repo }}/csi-attacher:v2.1.0
+{% elif k8s_version >= '1.15.0' %}
+        image: {{ sidecar.repo }}/csi-attacher:v2.0.0
+{% elif k8s_version >= '1.14.0' %}
+        image: {{ sidecar.repo }}/csi-attacher:v1.1.1
+{% else %}
+        image: {{ sidecar.repo }}/csi-attacher:v0.4.2
+{% endif %}
         imagePullPolicy: {{ sidecar.image_pull_policy }}
         args:
           - "--v={{ log_level }}"
