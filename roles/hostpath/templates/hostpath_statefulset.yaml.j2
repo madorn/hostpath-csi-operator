@@ -90,7 +90,7 @@ spec:
 
       # attacher - interacts with kube API for VolumeAttachment objects, sends calls to socket-dir
       - name: csi-attacher
-{% elif k8s_version >= '1.17.0' %}
+{% if k8s_version >= '1.17.0' %}
         image: {{ sidecar.repo }}/csi-attacher:v2.2.0
 {% elif k8s_version >= '1.16.0' %}
         image: {{ sidecar.repo }}/csi-attacher:v2.1.0
