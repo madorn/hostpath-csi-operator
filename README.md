@@ -13,9 +13,7 @@ If you are a CSI driver author and have previously developed Helm Charts for you
 Requirements
 ------------
 
-A Kubernetes 1.17 cluster.
-
-**TODO**: conditionals based off k8s versions to ensure proper CSI sidecar versions are deployed.
+TODO
 
 Example Playbook
 ----------------
